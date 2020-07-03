@@ -35,18 +35,11 @@ namespace Aula27 {
             };
             File.AppendAllLines (PATH, linha);
         }
-
-        /// <summary>
         /// Lê o csv
         /// </summary>
         /// <returns>Lista</returns>
         public List<Produto> Ler(){
             List<Produto> produtos = new List<Produto>();
-            //tentativa de fazer o desafio:
-
-            var Ler = from p in produtos where Preco > Codigo select produtos;
-
-            //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--==--=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
             string[] linhas = File.ReadAllLines(PATH);
 
@@ -59,10 +52,68 @@ namespace Aula27 {
                 p.Preco = float.Parse(dado[2]);
                 produtos.Add(p);
             }
-
+            produtos = produtos.OrderBy(y => y.Nome).ToList();
             return produtos;
         }
-        private string Separar(string _coluna){
+        public void Remover(string _termo){
+
+
+            List<string> linhas = new List<string>();
+
+            using(StreamReader arquivo = new StreamReader(PATH))
+            {
+                string linha;
+                while((linha = arquivo.ReadLine()) != null)
+                {
+                    linhas.Add(linha);
+                }
+            }
+
+            linhas.RemoveAll(l => l.Contains(_termo));
+
+            ReescreverCSV(linhas);
+        }
+        
+
+        public void Alterar(Produto _produtoAlterado){
+
+            List<string> linhas = new List<string>();
+
+            using(StreamReader arquivo = new StreamReader(PATH))
+            {
+                string linha;
+                while((linha = arquivo.ReadLine()) != null)
+                {
+                    linhas.Add(linha);
+                }
+            }
+
+            linhas.RemoveAll(z => z.Split(";")[0].Split("=")[1] == _produtoAlterado.Codigo.ToString());
+
+            linhas.Add( PrepararLinha(_produtoAlterado) );
+
+            ReescreverCSV(linhas);         
+        }
+
+
+        private void ReescreverCSV(List<string> lines){
+            using(StreamWriter output = new StreamWriter(PATH))
+            {
+                foreach(string ln in lines)
+                {
+                    output.Write(ln + "\n");
+                }
+            }   
+        }
+
+        public List<Produto> Filtrar(string _nome)
+        {
+            return Ler().FindAll(x => x.Nome == _nome);
+        }
+
+        private string Separar(string _coluna)
+        {
+
             return _coluna.Split("=")[1];
         }
         
